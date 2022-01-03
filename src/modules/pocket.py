@@ -64,6 +64,7 @@ class Pocket:
         '''
         output = np.array([np.vdot(x,self.weights) for x in X])
         return self.activation_func(output)
+        
     def accuracy(self,Y_predicted,Y_test):
         Y_predicted = self.activation_func(Y_predicted)
         Y_test      = self.activation_func(Y_test)
@@ -72,6 +73,7 @@ class Pocket:
             if Y_predicted[i] == Y_test[i]:
                 acc += 1
         return acc/len(Y_test)
+
     def draw_loss(self):
         x = np.array(self.loss)[:,0]
         y = np.array(self.loss)[:,1]

@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 # Class of the model
 
 class Perceptron:
-    def __init__(self,eps=0.1) :
+    def __init__(self,eps=0.1,n_iters=1000) :
+        self.n_itrs = n_iters
         self.eps = eps
         self.activation_function = self.activation_func
         self.weights = None
@@ -52,8 +53,7 @@ class Perceptron:
         t = 0
         while (Ls > self.eps) :
             for i in range(n_simples):
-                if self.sign(self.weights,X[i])*Y[i] < 0:
-
+                if self.sign(self.weights,X[i])*Y[i] <= 0:
                     self.weights += Y[i]*X[i]
                     t += 1
                     Ls = self.emperical_error(X,Y)
