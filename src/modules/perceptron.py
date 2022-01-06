@@ -1,86 +1,80 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
-# Class of the model
 
 class Perceptron:
-    def __init__(self,eps=0.1,n_iters=1000) :
-        self.n_itrs = n_iters
-        self.eps = eps
-        self.activation_function = self.activation_func
+    def __init__(self, learning_rate=0.001, n_iters=100):
+        self.lr = learning_rate
+        self.n_iters = n_iters
+        self.emperical_error = self.emperical_error
+        self.activation_func = self._unit_step_func
+        self.tf_func = self.truefalse_func
         self.weights = None
+        self.bias = None
         self.loss = []
-    
-    def sign(self,W,X):
-        
-        # X : Array of simple i
-        # W : Weights
-        
-        return np.sign(np.vdot(W,X))
 
+    def fit(self, X, y):
+        n_samples, n_features = X.shape
 
-    # Activation function
-    def activation_func(self,Y):
+        # init parameters
+        self.weights = np.random.rand(n_features)
+        self.bias = 0
+
+        y_ = np.array([1 if i > 0 else 0 for i in y])
         
-        #Y : Predictions 
-        
-        return np.where(Y>0,1,-1)
-    
+        for _ in range(self.n_iters):
+            sum_error = 0.0
 
-    # Unit function: returns 1 if a is different than b or 0 otherwise
-    def unit_func(self,a,b):
-        return 1 if a!=b else 0
+            for idx, x_i in enumerate(X):    
+                linear_output = np.dot(x_i, self.weights) + self.bias
+                y_predicted = self.activation_func(linear_output)
+                error = (y_predicted - y_[idx])
+                sum_error += error**2
+                # Perceptron update rule
+                update = self.lr * (y_[idx] - y_predicted)
+                self.weights += update * x_i
+                self.bias += update
+            Ls = sum_error / X.shape[0]
+            print([_,Ls])
+            self.loss.append([_,Ls])
+            
+            
+            
 
-    # Function that computes the empirical error of the model
-    def emperical_error(self,X,Y):
+    def predict(self, X):
+        linear_output = np.dot(X, self.weights) + self.bias
+        y_predicted = self.activation_func(linear_output)
+        return y_predicted
+
+    def emperical_error(self,X,y):
         
         # X : array of all simples where the rows are the simples
         # Y : array of predictions
         n = len(X)
         sum = 0
         for i,x_i in enumerate(X) :
-            sum += self.unit_func(self.activation_func(np.vdot(self.weights,x_i)),Y[i])
+            sum += self.tf_func(self.activation_func(np.vdot(self.weights,x_i)),y[i])
         return sum/n
+    
+    def truefalse_func(self,a,b):
+        return 1 if a!=b else 0
 
-    # Fit function with which we train our model
-    def fit(self,X,Y):
-
-        y = self.activation_func(Y)
-        n_simples,n_features = X.shape
-        self.weights = np.random.rand(n_features)
-        
-        Ls = self.emperical_error(X,Y)
-        t = 0
-        while (Ls > self.eps) :
-            for i in range(n_simples):
-                if self.sign(self.weights,X[i])*Y[i] <= 0:
-                    self.weights += Y[i]*X[i]
-                    t += 1
-                    Ls = self.emperical_error(X,Y)
-                    self.loss.append([t,Ls])
-        return self.weights
-
-    # Predction function: it predict a value of an input through the model and not the y of the data
-    def predict(self,X):
-        # X: array of test set of samples
-        output = np.array([np.vdot(x,self.weights) for x in X])
-        return self.activation_func(output)
-
-    # Accuracy function: it returns the accuracy of the prediction in our model
-    def accuracy(self,Y_predicted,Y_test):
-        Y_predicted_ = self.activation_func(Y_predicted)
-        Y_test_      = self.activation_func(Y_test)
-        acc = 0
-        for i in range(len(Y_predicted_)):
-            if Y_predicted_[i] == Y_test_[i]:
-                acc += 1
-        return acc/len(Y_test_)
+    def _unit_step_func(self, x):
+        return np.where(x >= 0, 1, 0)
 
     # Loss drawing function: it gives the shape of the loss function through the list self.loss
     def draw_loss(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
         X = np.array(self.loss)[:,0]
         Y = np.array(self.loss)[:,1]
         plt.ylabel("Emperical Error")
         plt.xlabel("Iterations")
+        ymin = np.amin(0)
+        ymax = np.amax(1)
+        ax.set_ylim([ymin, ymax])
+
         plt.plot(X,Y)
         plt.show()
+        plt.close('all')
+
+

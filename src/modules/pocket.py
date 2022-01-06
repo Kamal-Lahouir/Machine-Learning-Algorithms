@@ -53,11 +53,14 @@ class Pocket:
             # Evaluate Ls(w(t))
             Ls_wt = self.emperical_error(X,Y,self.weights_t)
             Ls_ws = self.emperical_error(X,Y,self.weight_s)
-            self.loss.append([t,Ls_ws])
+            
             if Ls_wt < Ls_ws :
                 self.weight_s = self.weights_t
+            
+            self.loss.append([t,Ls_ws])
         self.weights = self.weight_s
         return self.weights
+        
     def predict(self,X):
         '''
         X: array of test set of samples
